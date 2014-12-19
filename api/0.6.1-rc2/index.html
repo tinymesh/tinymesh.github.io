@@ -1,0 +1,1253 @@
+<html>
+	<head>
+		<title>HTTP API - Tiny Mesh</title>
+		<link rel="stylesheet" href="./style.css" />
+		<meta charset="UTF-8" />
+	</head>
+
+	<body>
+		<div class="row">
+			<div class="container">
+				<div class="eight columns">
+					
+						<span class="hidden" id="endpoint"></span><h1 data-path="endpoint">Tiny Mesh Cloud API</h1>
+<p>Tinymesh Cloud™ is a SaaS platform that extends Tinymesh™ networks
+with a secure communication- and data storage infrastructure, and
+provides additional services for network configuration, key management
+and over-the-air (OTA) upgrades of devices.</p>
+<p>The service is accessed through a RESTfull API that consumes JSON data.
+The API tightly integrates with the Tinymesh™ protocol by providing
+high-level interfaces and development patterns familiar to industrial
+systems as well as the modern application developer.</p>
+<h2>Getting Started</h2>
+<p>To get started developing using the cloud you will need some
+hardware (available through a <a href="http://www.radiocrafts.com/index.php?sideID=41">Radiocrafts distributor</a>.
+Once setup the <a href="https://cloud.tiny-mesh.com/">Cloud Workbench</a>
+provides an easy to use interface for communicating with your devices.</p>
+
+					
+						<span class="hidden" id="endpoint-authentication"></span><h1 id="authentication" data-path="endpoint.authentication">Authentication</h1>
+<p>Provides endpoint for authenticate related tasks, including creation
+and destruction of temporary session keys, and checking authentication
+information.</p>
+<h2 id="authentication_object" class="note">Authentication Object</h2>
+<p>The authentication object returned. The <code class="inline">key</code> parameter will only
+be present on the initial call to <code class="inline">/auth/session</code>, not to any calls 
+to <code class="inline">/auth</code>.</p>
+<pre><code class="">{
+   &quot;type&quot; : The type of entity used for authentication, either user or organization
+   &quot;owner&quot; : The entity the request was authenticated as, either a organization or user id (see type)
+   &quot;resources&quot; : A list of resources in the form `&lt;type&gt;/&lt;entity&gt;`
+   &quot;ttl&quot; : (maybe) The expiration date for a key
+   &quot;fingerprint&quot; : (maybe) The key fingerprint, only for key based authentication
+   &quot;key&quot; : (maybe) The key to use for a session
+}</code></pre>
+
+					
+						<span class="hidden" id="endpoint-authentication-delete-auth-session"></span><h2 id="authentication-delete-auth-session" data-path="endpoint.authentication.delete-auth-session">DELETE /auth/session</h2>
+<p>Destroy the current session</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">205 Reset Content</code> - when session was destroyed
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> if a non-session based key was used
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> when authentication failed
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-authentication-get-auth"></span><h2 id="authentication-get-auth" data-path="endpoint.authentication.get-auth">GET /auth</h2>
+<p>Retrieve authentication information, useful to validate
+authentication is working as expected. The value returned will be a
+Authentication Object</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with <a href="#authentication_object">Authentication Object</a>
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-authentication-post-auth-session"></span><h2 id="authentication-post-auth-session" data-path="endpoint.authentication.post-auth-session">POST /auth/session</h2>
+<p>Create a session key for a user, the authentication happens either
+by using HTTP Basic authentication or by providing an object with
+the keys <code class="inline">email</code> and <code class="inline">password</code>.</p>
+<p>The key expires 3600 after last use.</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with <a href="#authentication_object">Authentication Object</a>
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> if invalid input was given
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> when authentication failed
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-channels"></span><h1 data-path="endpoint.channels">Channels</h1>
+<p>HTTP endpoint for working with channels</p>
+
+					
+						<span class="hidden" id="endpoint-channels-post-channel-network-channel"></span><h2 data-path="endpoint.channels.post-channel-network-channel">POST /channel/:network/:channel</h2>
+<p>Pushes a raw message to a channel. It MUST be a object containing
+the field <code class="inline">raw</code> with Base64 encoded value.</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">202 Accepted</code> - with no content
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> if input was invalid
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+<li><code class="inline">404 Not Found</code> - with <a href="#error_object">Error Object</a> if network or channel was not available
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-devices"></span><h1 data-path="endpoint.devices">Devices</h1>
+<p>HTTP endpoint for manipulating organization resources</p>
+
+					
+						<span class="hidden" id="endpoint-devices-get-device-network-device"></span><h2 data-path="endpoint.devices.get-device-network-device">GET /device/:network/:device</h2>
+<p>Retrieves a <code class="inline">device</code> from <code class="inline">network</code></p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with list of <a href="#network_object">Network Object</a>'s
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+<li><code class="inline">404 Not Found</code> - with <a href="#error_object">Error Object</a> if device does not exists
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-devices-post-device-network"></span><h2 data-path="endpoint.devices.post-device-network">POST /device/:network</h2>
+<p>Creates a new device under <code class="inline">network</code>.</p>
+<p>Returns the new object with it's path in <code class="inline">location</code> header. If a
+there was a conflict the location of the existing device will be in
+the <code class="inline">location</code> header.</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with list of <a href="#network_object">Network Object</a>'s
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> on invalid input data
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+<li><code class="inline">404 Not Found</code> - with <a href="#error_object">Error Object</a> if device does not exists
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-devices-put-device-network-device"></span><h2 data-path="endpoint.devices.put-device-network-device">PUT /device/:network/:device</h2>
+<p>Update a <code class="inline">device</code> resource</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with list of <a href="#network_object">Network Object</a>'s
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> on invalid input data
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-messages"></span><h1 data-path="endpoint.messages">Messages</h1>
+<p>HTTP endpoint for querying messages</p>
+
+					
+						<span class="hidden" id="endpoint-messages-get-message-network-device"></span><h2 data-path="endpoint.messages.get-message-network-device">GET /message/:network+:device</h2>
+<p>Returns a object containing fields according to <a href="#message_formats">Message Formats</a></p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with list of <a href="#packet_object">Packet Object</a>'s
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+<li><code class="inline">404 Not Found</code> - with <a href="#error_object">Error Object</a> if message was not found
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-messages-get-message-query-network-deviceselector"></span><h2 data-path="endpoint.messages.get-message-query-network-deviceselector">GET /message-query/:network/[:device-selector]</h2>
+<p>Performs a query in <code class="inline">:network</code>, possibly limited by <code class="inline">:device-selector</code>.
+The call either returns chunked HTTP response where each individual
+packet is returned as chunk, or a structure containing query
+metadata and results.</p>
+<h3>Use of `:device-selector`</h3>
+<p>The device selector may be used to limit the devices queried to
+either a single device, list of devices or all devices matching a
+equality check.</p>
+<pre><code class=""># Query all devices in a network
+GET https://cloud.tiny-mesh.com/api/message-query/PG3?&lt;queryparams&gt;
+
+# Query a single devices (`:device-selector` = &lt;network&gt;/&lt;deviceid&gt;`)
+GET https://cloud.tiny-mesh.com/api/message-query/PG3/1RnbaX9?&lt;queryparams&gt;
+
+# Query using a comma spearted list of devices (`:device-selector` = # &lt;network&gt;/&lt;dev1&gt;,&lt;dev2&gt;,..`)
+GET https://cloud.tiny-mesh.com/api/message-query/PG3/1RnbaX9,YWiMHj3?&lt;queryparams&gt;
+
+# Query devices matching a precond (`:device-selector` = # # &lt;network&gt;/&lt;key&gt;:&lt;value&gt;`)
+# `&lt;key&gt;` may be any one field in `devicemap.&lt;device&gt;.*`. found in a network
+GET https://cloud.tiny-mesh.com/api/message-query/PG3/type:gateway?&lt;queryparams&gt;</code></pre>
+<h3 id="query_result_structure" class="note">Example of query structure</h3>
+<p>On non-streaming queries the following structure is returned.</p>
+<pre><code class="">{
+   &quot;meta&quot; : {
+      &quot;date&quot; : {
+         &quot;to&quot; : &quot;2014-11-12T00:00:00.0000000Z&quot;,
+         &quot;from&quot; : &quot;2014-11-13T00:00:00.0000000Z&quot;,
+         &quot;diff&quot; : 86400
+      },
+      &quot;query&quot; : {
+         &quot;next&quot; : {
+           &quot;date.to&quot; : &quot;2014-11-13T00:00:00.0000000Z&quot;,
+           &quot;date.from&quot; : &quot;2014-11-14T00:00:00.0000000Z&quot;,
+         },
+         &quot;prev&quot; : {
+           &quot;date.to&quot; : &quot;2014-11-10T00:00:00.0000000Z&quot;,
+           &quot;date.from&quot; : &quot;2014-11-11T00:00:00.0000000Z&quot;,
+         }
+      },
+      &quot;conditions&quot; : [],
+      &quot;objects&quot; : 1433
+   },
+   &quot;result&quot; : [
+      // result set ....
+    ]
+}</code></pre>
+<h3 id="query_parameters" class="note">Parameters</h3>
+<ul>
+<li><code class="inline">date.from</code> - a <a href="#date_field">Date Field</a> value specify start of query time range
+</li>
+<li><code class="inline">date.to</code> - a <a href="#date_field">Date Field</a> value specify end of query time range
+</li>
+<li><code class="inline">filter.pick</code> - A comma separated list of keys to include from the
+<a href="#packet_object">Packet Object</a> results
+</li>
+<li><code class="inline">filter.omit</code> - A comma separated list of keys to exclude from the
+<a href="#packet_object">Packet Object</a> results
+</li>
+<li><code class="inline">limit</code> - An integer specifying the number of results to return
+</li>
+<li><code class="inline">sort.key</code> - The key to sort by, deep values can be specified by
+using <code class="inline">.</code> as separator, ie: <code class="inline">proto/tm.packet_num</code> (default: <code class="inline">datetime</code>)
+</li>
+<li><code class="inline">sort.reverse</code> - <code class="inline">true|false</code> if the result set should be reversed
+</li>
+<li><code class="inline">query</code> - A comma separated list of <a href="#query_preconditions">Query Preconditions</a>
+</li>
+<li><code class="inline">stream</code> - a comma separated list of <a href="#channels">Channels</a> to stream
+from. If non empty the HTTP response will be chunked with each
+message delivered as a chunk.
+</li>
+<li><code class="inline">accept</code> - <code class="inline">Accept</code> value, as specified by
+<a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.1">HTTP spec</a>
+</li>
+<li><code class="inline">authorization</code> - <code class="inline">Authorization</code> value, as specified by
+<a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.8">HTTP spec</a>
+</li>
+</ul>
+<h3 id="date_field" class="note">Date field</h3>
+<p>The Date field is used to select a date time based on some simple
+constructs.  The field expects input formatted as
+<a href="http://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> dates or the
+string literal NOW which represents the current server time.</p>
+<p>The date field can be manipulate by adding or subtracting time, the
+constructs can be chained together by using <code class="inline">//</code> for separation.</p>
+<p>The following commands are supported:</p>
+<ul>
+<li><code class="inline">//+?[N][UNIT]</code> add <code class="inline">[UNIT]</code> of time where <code class="inline">[N]</code> is an integer.
+</li>
+<li><code class="inline">//-[N][UNIT]</code> subtract <code class="inline">[UNIT]</code> of time where <code class="inline">[N]</code> is an integer.
+</li>
+</ul>
+<p>Unit can be one of the following: <code class="inline">YEAR</code>, <code class="inline">MONTH</code>, <code class="inline">WEEK</code>, <code class="inline">DAY</code>,
+<code class="inline">HOUR</code>, <code class="inline">MINUTE</code>, or <code class="inline">SECOND</code>.</p>
+<p><strong>Example:</strong> <code class="inline">2014//+1MONTH//-1WEEK</code>, specifies the start last week of January 2014</p>
+<blockquote><p>All dates are expected to be UTC dates. There is no plan to add
+support for timezones.</p>
+</blockquote>
+<h3 id="query_preconditions" class="note">Query conditions</h3>
+<p>A query result set can be reduced by using a series of preconditions.
+The conditions takes a simple form: <key> <operator> <value> where
+the <operator> can be one of:</p>
+<ul>
+<li><code class="inline">:</code> — (equality)
+</li>
+<li><code class="inline">!:</code> — (non-equality)
+</li>
+<li><code class="inline">&gt;:</code> — (greater than or equal to)
+</li>
+<li><code class="inline">&gt;</code> — (greater than)
+</li>
+<li><code class="inline">:&lt;</code> — (less than or equal to)
+</li>
+<li><code class="inline">&lt;</code> — (less than)
+</li>
+</ul>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with object containing query metadata and a list of <a href="#packet_object">Packet Object</a>'s
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> on bad query terms
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-messages-post-message-network-device"></span><h2 data-path="endpoint.messages.post-message-network-device">POST /message/:network/:device</h2>
+<p>Create a new message for the device specified. The structure of the
+message must be as defined in <a href="#packet_formats">Packet Formats</a>. Values like <code class="inline">uid</code>
+and <code class="inline">sid</code> are automatically set by the system, whilst <code class="inline">package_num</code>
+can optionally be specified. All other parameters are required.</p>
+<p>Creating event or serial messages from the API is discouraged, for
+all other purposes than federating data.</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with list of <a href="#packet_object">Packet Object</a>'s
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> if invalid data was given
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+<li><code class="inline">404 Not Found</code> - with <a href="#error_object">Error Object</a> if device or network was not found
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-network"></span><h1 data-path="endpoint.network">Networks</h1>
+<p>HTTP endpoint for manipulating organization resources</p>
+
+					
+						<span class="hidden" id="endpoint-network-get-network"></span><h2 data-path="endpoint.network.get-network">GET /network</h2>
+<p>Retrieves a list of all <code class="inline">network</code> for the authenticated entity</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with list of <a href="#network_object">Network Object</a>'s
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-network-get-network-network"></span><h2 data-path="endpoint.network.get-network-network">GET /network/:network</h2>
+<p>Retrieve a <code class="inline">network</code></p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with <a href="#network_object">Network Object</a>
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+<li><code class="inline">404 Not Found</code> - with <a href="#error_object">Error Object</a> if network was not found
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-network-post-network"></span><h2 data-path="endpoint.network.post-network">POST /network</h2>
+<p>Creates a new network object, payload should contain a minimal
+<a href="#network_object">Network Object</a> but may be empty.</p>
+<p>Special care must be taken using the <code class="inline">parents</code> property. If the
+<code class="inline">parents</code> property is not defined it will use data derived from the
+authentication information (if authenticated as <code class="inline">user</code>, <code class="inline">user/:email</code>
+will be added, if authenticated as <code class="inline">organization</code> <code class="inline">organization/:org</code>
+will be added). Otherwise any combination user or clients that the
+current user have access to may be specified.</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">201 Created</code> - with list of <a href="#network_object">Network Object</a>'s
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> if errors in input
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+<li><code class="inline">404 Not Found</code> - with <a href="#error_object">Error Object</a> if any of the parent resources was not found
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-network-put-network-network"></span><h2 data-path="endpoint.network.put-network-network">PUT /network/:network</h2>
+<p>Update a network</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with <a href="#network_object">Network Object</a>
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> on invalid input data
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+<li><code class="inline">404 Not Found</code> - with <a href="#error_object">Error Object</a> if network was not found
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-organizations"></span><h1 data-path="endpoint.organizations">Organizations</h1>
+<p>HTTP endpoint for manipulating organization resources</p>
+
+					
+						<span class="hidden" id="endpoint-organizations-delete-organization-organization-user-user"></span><h2 data-path="endpoint.organizations.delete-organization-organization-user-user">DELETE /organization/:organization/user/:user</h2>
+<p>Removes <code class="inline">user</code> from <code class="inline">organization</code>, revoking all access to
+the <code class="inline">organization</code> resources.</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with <a href="#organization_object">Organization Object</a>
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> if invalid data given
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+<li><code class="inline">404 Not Found</code> - with <a href="#error_object">Error Object</a> if either user or organization was not found
+</li>
+<li><code class="inline">409 Conflict</code> - with <a href="#error_object">Error Object</a> when deleting last user
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-organizations-get-organization"></span><h2 data-path="endpoint.organizations.get-organization">GET /organization</h2>
+<p>Retrieves a list of all <code class="inline">organizations</code> for <code class="inline">user</code></p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with list of <a href="#organization_object">Organization Object</a>'s
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-organizations-get-organization-organization"></span><h2 data-path="endpoint.organizations.get-organization-organization">GET /organization/:organization</h2>
+<p>Retrieves a <code class="inline">organization</code> resource</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with <a href="#organization_object">Organization Object</a>
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+<li><code class="inline">404 Not Found</code> - with <a href="#error_object">Error Object</a> if either user or organization was not found
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-organizations-put-organization-organization"></span><h2 data-path="endpoint.organizations.put-organization-organization">PUT /organization/:organization</h2>
+<p>Update a <code class="inline">organization</code> resource</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with <a href="#organization_object">Organization Object</a>
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> if invalid data was given
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+<li><code class="inline">404 Not Found</code> - with <a href="#error_object">Error Object</a> if either user or organization was not found
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-organizations-put-organization-organization-user-user"></span><h2 data-path="endpoint.organizations.put-organization-organization-user-user">PUT /organization/:organization/user/:user</h2>
+<p>Add <code class="inline">user</code> to <code class="inline">organization</code>, effectively allowing <code class="inline">user</code> to access
+all resources under said <code class="inline">organization</code>.</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with <a href="#organization_object">Organization Object</a>
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> if invalid data given
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+<li><code class="inline">404 Not Found</code> - with <a href="#error_object">Error Object</a> if either user or organization was not found
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-user"></span><h1 data-path="endpoint.user">User</h1>
+<p>HTTP endpoint for manipulating user object</p>
+
+					
+						<span class="hidden" id="endpoint-user-get-user"></span><h2 data-path="endpoint.user.get-user">GET /user</h2>
+<p>Retrieves the current user resource</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with <a href="#user_object">User Object</a>
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-user-put-user"></span><h2 data-path="endpoint.user.put-user">PUT /user</h2>
+<p>Retrieves the current user resource</p>
+<h3>Return</h3>
+<ul>
+<li><code class="inline">200 OK</code> - with <a href="#user_object">User Object</a>
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> if invalid data given
+</li>
+<li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
+</li>
+</ul>
+
+					
+						<span class="hidden" id="endpoint-user-user-register"></span><h1 data-path="endpoint.user.user-register">POST /user/register</h1>
+<p>Creates a new users</p>
+<h2>Return</h2>
+<ul>
+<li><code class="inline">201 Created</code> - with <a href="#user_object">User Object</a>
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> if error in payload
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if users already exists
+</li>
+</ul>
+
+					
+
+					
+						<span class="hidden" id="proto"></span><h1 data-path="proto">Tiny Mesh Protocol</h1>
+<h2>Appendix</h2>
+<p>{: data-path=proto.appendix</p>
+<span class="hidden" id="proto-appendix-command-format"></span><h2 data-path="proto.appendix.command-format">Command Format</h2>
+<p>Outgoing commands share a common base format containing things like
+command number and the target device UID.</p>
+<p>If the Tiny Mesh Cloud service is used the UID and packet number
+will be dictated by the API.</p>
+<h3>Fields</h3>
+<ul>
+<li><code class="inline">uid</code> - The unique id of the Tiny Mesh Network
+</li>
+<li><code class="inline">type</code> - Always set to <code class="inline">command</code>
+</li>
+<li><code class="inline">command</code> - The type of command issued
+</li>
+<li><code class="inline">cmd_number</code> - The command number used, returned by
+<a href="#proto-event-ack">ACK's</a> and
+<a href="#proto-event-nak">NAK's</a> events.
+</li>
+</ul>
+<span class="hidden" id="proto-appendix-event-header"></span><h2 data-path="proto.appendix.event-header">Event Header</h2>
+<p>All event messages contain some header information. These field can
+be used to gather some metrics about changes in network and quality
+of message delivery.</p>
+<p>See also: <a href="#proto-appendix-generic-event-packet">Generic Event Packet</a></p>
+<h3>Fields</h3>
+<ul>
+<li><code class="inline">sid</code> - The system id of the Tiny Mesh Network
+</li>
+<li><code class="inline">uid</code> - The unique id of the Tiny Mesh Network
+</li>
+<li><code class="inline">rssi</code> - The signal strength to the neighbouring node
+</li>
+<li><code class="inline">network_lvl</code> - The hop level the device is located at
+</li>
+<li><code class="inline">hops</code> - The number of hops the packet have traversed
+</li>
+<li><code class="inline">packet_number</code> - The id of the packet generated by the device
+</li>
+<li><code class="inline">latency</code> - The time packet have been in the RF network before delivery
+</li>
+<li><code class="inline">type</code> - Always set to <code class="inline">event</code>
+</li>
+<li><code class="inline">detail</code> - The type of event received
+</li>
+</ul>
+<span class="hidden" id="proto-command"></span><h2 data-path="proto.command">Commands</h2>
+<span class="hidden" id="proto-command-force_reset"></span><h3 data-path="proto.command.force_reset">command/force_reset</h3>
+<p>Forces the device to perform a reset.</p>
+<p>See <a href="#proto-appendix-command-format">Command Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-command-get_calibration"></span><h3 data-path="proto.command.get_calibration">command/get_calibration</h3>
+<p>Request the calibration memory of a device. The response should be a
+<a href="#proto-event-calibration">event/calibration</a> packet.</p>
+<p>See <a href="#proto-prefix-command-format">Command Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-command-get_config"></span><h3 data-path="proto.command.get_config">command/get_config</h3>
+<p>Request the configuration memory of a device. The response should be a
+<a href="#proto-event-config">event/config</a> packet.</p>
+<p>See <a href="#proto-prefix-command-format">Command Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-command-get_did_status"></span><h3 data-path="proto.command.get_did_status">command/get_did_status</h3>
+<p>Request the DID status of a device. The response should be a
+<a href="#proto-event-next_receiver">event/next_receiver</a> packet.</p>
+<p>See <a href="#proto-prefix-command-format">Command Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-command-get_nid"></span><h3 data-path="proto.command.get_nid">command/get_nid</h3>
+<p>Request the network id of a gateway. The response should be a
+<a href="#proto-event-nid">event/nid</a> packet. If the device is not a gateway
+the response is undefined.</p>
+<p>See <a href="#proto-prefix-command-format">Command Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-command-get_path"></span><h3 data-path="proto.command.get_path">command/get_path</h3>
+<p>Request the device to generate a communication path, the response
+should be a <a href="#proto-event-path">event/path</a> packet.</p>
+<p>See <a href="#proto-appendix-command-format">Command Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-command-get_status"></span><h3 data-path="proto.command.get_status">command/get_status</h3>
+<p>Request the status of a device. The response should be a
+<a href="#proto-event-ima">event/ima</a> packet.</p>
+<p>See <a href="#proto-prefix-command-format">Command Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-command-init_gw_config"></span><h3 data-path="proto.command.init_gw_config">command/init_gw_config</h3>
+<p>Sets a gateway in configuration mode. If the device is not a
+gateway the response from the device is undefined.</p>
+<p>See <a href="#proto-prefix-command-format">Command Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-command-serial"></span><h3 data-path="proto.command.serial">command/serial</h3>
+<p>Send a serial command string to the device. Unless <code class="inline">device.command_ack</code>
+is set to true there will be no response from the device.</p>
+<h3>Fields:</h3>
+<ul>
+<li><code class="inline">data</code> - string with length 0..120
+</li>
+</ul>
+<p>See <a href="#proto-appendix-command-format">Command Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-command-set_config"></span><h3 data-path="proto.command.set_config">command/set_config</h3>
+<p>Send a over the air configuration update. The device MAY respond
+with a <a href="#proto-event-ack">event/ack</a> or <a href="#proto-event-nak">event/nak</a> packet.
+before a <a href="#proto-event-reset">event/reset</a> packet is received
+(indicating a successful config change).</p>
+<h3>Fields</h3>
+<ul>
+<li><code class="inline">config</code> - The config object to set (see <a href="#proto-configuration">Configuration Options</a>)
+</li>
+</ul>
+<p>See <a href="#proto-appendix-command-format">Command Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-command-set_output"></span><h3 data-path="proto.command.set_output">command/set_output</h3>
+<p>Configure the runtime state of one or more digital pins. Unless
+<code class="inline">device.command_ack</code> is set to true there will be no response from
+the device.</p>
+<h3>Fields</h3>
+<ul>
+<li><code class="inline">gpio.gpio_{0 - 7}</code> - true|false
+</li>
+</ul>
+<p>See <a href="#proto-appendix-command-format">Command Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-command-set_pwm"></span><h3 data-path="proto.command.set_pwm">command/set_pwm</h3>
+<p>Configure the runtime PWM output state. Unless <code class="inline">device.command_ack</code>
+is set to true there will be no response from the device.</p>
+<h3>Fields</h3>
+<ul>
+<li><code class="inline">pwm</code> - integer: 0 - 100
+</li>
+</ul>
+<p>See <a href="#proto-appendix-command-format">Command Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-configuration"></span><h2 data-path="proto.configuration">Configuration Options</h2>
+<p><strong>Note:</strong> This documentation was generated for version
+1.41&quot;. If your version of the firmware is newer, look for
+the updated version of this documentation at the bottom of this page.</p>
+<h2>Parameters</h2>
+<ul>
+<li><code class="inline">rf.mac_rnd_mask_2</code> - enum: 116, 63, 31, 15, 7, 3 (since: 1.38)
+</li>
+<li><code class="inline">rf.mac_rnd_mask_1</code> - enum: 116, 63, 31, 15, 7, 3 (since: 1.38)
+</li>
+<li><code class="inline">net.command_retries</code> - integer: 0..127 
+</li>
+<li><code class="inline">net.command_accept_time</code> - integer: 0..255 
+</li>
+<li><code class="inline">group.membership</code> - set (max size: 8 (since: 1.40)
+</li>
+<li><code class="inline">pulse_counter.feedback</code> - enum: 0, 2 (since: 1.40)
+</li>
+<li><code class="inline">pulse_counter.feedback_port</code> - enum: 0, 1, 2, 3, 4, 5, 6, 7, 255 (since: 1.40)
+</li>
+<li><code class="inline">rf_jamming.port</code> - enum: 0, 1, 2, 3, 4, 5, 6, 7, 255 (since: 1.34)
+</li>
+<li><code class="inline">rf_jamming.detect</code> - integer: 0..100 (since: 1.34)
+</li>
+<li><code class="inline">device.detect_busy_network</code> - enum: 0, 1, 2 (since: 1.20)
+</li>
+<li><code class="inline">cluster.rssi_threshold</code> - integer: 40..100 (since: 1.34)
+</li>
+<li><code class="inline">cluster.device_limit</code> - integer: 5..100 (since: 1.34)
+</li>
+<li><code class="inline">net.connect_change_margin</code> - integer: 0..255 (since: 1.37)
+</li>
+<li><code class="inline">pulse_counter.debounce</code> - integer: 0..255 (since: 1.40)
+</li>
+<li><code class="inline">pulse_counter.mode</code> - enum: 0, 1, 3 (since: 1.40)
+</li>
+<li><code class="inline">device.sleep_or_rts_pin</code> - enum: 0, 1 (since: 1.40)
+</li>
+<li><code class="inline">device.command_ack</code> - enum: 0, 1 (since: 1.20)
+</li>
+<li><code class="inline">device.sniff_neighbours</code> - enum: 0, 1 (since: 1.40)
+</li>
+<li><code class="inline">device.indicators_timeout</code> - integer: 0..255 (since: 1.40)
+</li>
+<li><code class="inline">end_device.wakeon_port</code> - enum: 0, 1, 2, 3, 4, 5, 6, 7, 255 (since: 1.40)
+</li>
+<li><code class="inline">end_device.wakeon</code> - integer: 0..15 (since: 1.40)
+</li>
+<li><code class="inline">end_device.keepalive</code> - integer: 0..255 (since: 1.40)
+</li>
+<li><code class="inline">security.level</code> - enum: 0, 1, 2 (since: 1.31)
+</li>
+<li><code class="inline">device.fw_revision</code> - string: <major.minor> 
+</li>
+<li><code class="inline">device.hw_revision</code> - string: <major.minor> 
+</li>
+<li><code class="inline">device.part</code> - string 
+</li>
+<li><code class="inline">uart.buffer_margin</code> - integer: 0..100 (since: 1.31)
+</li>
+<li><code class="inline">uart.flow_control</code> - integer: 1..59 (since: 1.31)
+</li>
+<li><code class="inline">uart.stop_bits</code> - enum: 1, 2 (since: 1.21)
+</li>
+<li><code class="inline">uart.parity</code> - enum: 0, 1 (since: 1.21)
+</li>
+<li><code class="inline">uart.bits</code> - enum: 8, 9 (since: 1.21)
+</li>
+<li><code class="inline">uart.baud_rate</code> - enum: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 
+</li>
+<li><code class="inline">uart.cts_hold_time</code> - integer: 1..255 
+</li>
+<li><code class="inline">gpio.input_debounce</code> - integer: 0..255 
+</li>
+<li><code class="inline">gpio_7.pwm_default</code> - integer: 0..100 
+</li>
+<li><code class="inline">gpio_7.trigger</code> - enum: 0, 1, 2, 3 
+</li>
+<li><code class="inline">gpio_7.config</code> - enum: 0, 1, 3, 4 
+</li>
+<li><code class="inline">gpio_6.trigger</code> - enum: 0, 1, 2, 3 
+</li>
+<li><code class="inline">gpio_6.config</code> - enum: 0, 1, 4 
+</li>
+<li><code class="inline">gpio_5.trigger</code> - enum: 0, 1, 2, 3 
+</li>
+<li><code class="inline">gpio_5.config</code> - enum: 0, 1, 4 
+</li>
+<li><code class="inline">gpio_4.trigger</code> - enum: 0, 1, 2, 3 
+</li>
+<li><code class="inline">gpio_4.config</code> - enum: 0, 1, 4 
+</li>
+<li><code class="inline">gpio_3.trigger</code> - enum: 0, 1, 2, 3 
+</li>
+<li><code class="inline">gpio_3.config</code> - enum: 0, 1, 4 
+</li>
+<li><code class="inline">gpio_2.trigger</code> - enum: 0, 1, 2, 3 
+</li>
+<li><code class="inline">gpio_2.config</code> - enum: 0, 1, 4 
+</li>
+<li><code class="inline">gpio_1.analogue_sample_rate</code> - integer: 0..255 
+</li>
+<li><code class="inline">gpio_1.analogue_low_trig</code> - integer: 0..2047 
+</li>
+<li><code class="inline">gpio_1.analogue_high_trig</code> - integer: 0..2047 
+</li>
+<li><code class="inline">gpio_1.trigger</code> - enum: 0, 1, 2, 3 
+</li>
+<li><code class="inline">gpio_1.config</code> - enum: 0, 1, 2, 4 
+</li>
+<li><code class="inline">gpio_0.analogue_sample_rate</code> - integer: 0..255 
+</li>
+<li><code class="inline">gpio_0.analogue_low_trig</code> - integer: 0..2047 
+</li>
+<li><code class="inline">gpio_0.analogue_high_trig</code> - integer: 0..2047 
+</li>
+<li><code class="inline">gpio_0.trigger</code> - enum: 0, 1, 2, 3 
+</li>
+<li><code class="inline">gpio_0.config</code> - enum: 0, 1, 2, 4 
+</li>
+<li><code class="inline">net.excellent_rssi</code> - integer: 0..255 (since: 1.37)
+</li>
+<li><code class="inline">device.sid</code> - integer: 0..4294967295 
+</li>
+<li><code class="inline">device.uid</code> - integer: 0..4294967295 
+</li>
+<li><code class="inline">device.locator</code> - enum: 0, 1 
+</li>
+<li><code class="inline">device.type</code> - enum: 1, 2 
+</li>
+<li><code class="inline">device.type</code> - enum: 1, 2, 3 (since: 1.40)
+</li>
+<li><code class="inline">device.protocol_mode</code> - enum: 0, 1 
+</li>
+<li><code class="inline">uart.timeout</code> - integer: 1..255 
+</li>
+<li><code class="inline">net.tx_retry_limit</code> - integer: 1..255 
+</li>
+<li><code class="inline">net.max_packet_latency</code> - integer: 1..255 
+</li>
+<li><code class="inline">net.max_jump_count</code> - integer: 1..255 
+</li>
+<li><code class="inline">net.max_jump_level</code> - integer: 1..255 
+</li>
+<li><code class="inline">net.connect_check_time</code> - integer: 4..20 
+</li>
+<li><code class="inline">ima.trig_hold</code> - integer: 0..255 (since: 1.40)
+</li>
+<li><code class="inline">ima.address_field</code> - enum: 0, 1, 2, 3 (since: 1.40)
+</li>
+<li><code class="inline">ima.data_field</code> - enum: 0, 1, 2 (since: 1.40)
+</li>
+<li><code class="inline">ima.on_connect</code> - enum: 0, 1 
+</li>
+<li><code class="inline">ima.time_base</code> - integer: 1..255 
+</li>
+<li><code class="inline">ima.time</code> - integer: 1..255 
+</li>
+<li><code class="inline">net.hiam_time</code> - integer: 1..10 
+</li>
+<li><code class="inline">net.rssi_cc_assesment</code> - integer: 100..210 
+</li>
+<li><code class="inline">net.rssi_threshold</code> - integer: 160..210 
+</li>
+<li><code class="inline">rf.data_rate</code> - integer: 1..6 
+</li>
+<li><code class="inline">rf.power</code> - integer: 1..5 
+</li>
+<li><code class="inline">rf.channel</code> - integer: 1..83 
+</li>
+</ul>
+<span class="hidden" id="proto-event"></span><h2 data-path="proto.event">Events</h2>
+<span class="hidden" id="proto-event-ack"></span><h3 data-path="proto.event.ack">event/ack (router)</h3>
+<p>Router high-level acknowledge</p>
+<h3>Fields</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">ack</code>
+</li>
+<li><code class="inline">cmd_number</code> - The command number that was acknowledged
+</li>
+<li><code class="inline">reason</code> - The reason the command was rejected
+</li>
+</ul>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-ack-gw"></span><h3 data-path="proto.event.ack-gw">event/ack (gateway)</h3>
+<p>Gateway acknowledge</p>
+<h3>Fields</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">ack</code>
+</li>
+<li><code class="inline">cmd_number</code> - The command number that was acknowledged
+</li>
+</ul>
+<span class="hidden" id="proto-event-aio0_change"></span><h3 data-path="proto.event.aio0_change">event/aio0_change</h3>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-aio1_change"></span><h3 data-path="proto.event.aio1_change">event/aio1_change</h3>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-config"></span><h3 data-path="proto.event.config">event/config</h3>
+<p>Response to a <a href="#proto-command-get_config">command/get_config</a>
+command.</p>
+<h3>Fields:</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">config</code>
+</li>
+<li><code class="inline">config</code> - The configuration memory dumop (see <a href="#proto-configuration">Configuration Options</a>)
+</li>
+</ul>
+<span class="hidden" id="proto-event-ima"></span><h3 data-path="proto.event.ima">event/ima</h3>
+<p>Reports a status messages either as a timed event or a response to a
+<a href="#proto-command-get_status">command/get_status</a>.</p>
+<h3>Fields:</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">ima</code>
+</li>
+</ul>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-io_change"></span><h3 data-path="proto.event.io_change">event/io_change</h3>
+<p>Detected change in digital I/O.</p>
+<h3>Fields</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">io_change</code>
+</li>
+<li><code class="inline">locator</code> - The id of closest locator (if any)
+</li>
+<li><code class="inline">triggers</code> - Map of GPIO pins triggered
+</li>
+</ul>
+<p>See <a href="#proto-appendix-generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-nak"></span><h3 data-path="proto.event.nak">event/nak (router)</h3>
+<p>Router high-level non-acknowledge</p>
+<h3>Fields</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">nak</code>
+</li>
+<li><code class="inline">cmd_number</code> - The command number that was acknowledged
+</li>
+<li><code class="inline">reason</code> - The reason the command was rejected
+</li>
+</ul>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-nak-gw"></span><h3 data-path="proto.event.nak-gw">event/nak (gateway)</h3>
+<p>Gateway non-acknowledge</p>
+<h3>Fields</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">nak</code>
+</li>
+<li><code class="inline">cmd_number</code> - The command number that was acknowledged
+</li>
+<li><code class="inline">reason</code> - The reason the command was rejected
+</li>
+</ul>
+<span class="hidden" id="proto-event-network_free"></span><p data-path="proto.event.network_free">See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-network_jammed"></span><h3 data-path="proto.event.network_jammed">event/network_jammed</h3>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-network_shared"></span><h3 data-path="proto.event.network_shared">event/network_shared</h3>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-network_taken"></span><h3 data-path="proto.event.network_taken">event/network_taken</h3>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<h3>event/network_free</h3>
+<span class="hidden" id="proto-event-nid"></span><h3 data-path="proto.event.nid">event/nid</h3>
+<h3>Fields</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">nid</code>
+</li>
+<li><code class="inline">nid</code> - The network id of the gateway
+</li>
+</ul>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-path"></span><h3 data-path="proto.event.path">event/path</h3>
+<p>Response to a <a href="#proto-command-get_path">command/get_path</a>
+command.</p>
+<h3>Fields:</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">path</code>
+</li>
+<li><code class="inline">path</code> - object with format <code class="inline">hop =&gt; [&lt;rssi&gt;, &lt;uid&gt;]</code>
+</li>
+</ul>
+<span class="hidden" id="proto-event-reset"></span><h3 data-path="proto.event.reset">event/reset</h3>
+<p>Reports a device reset</p>
+<h3>Fields:</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">reset</code>
+</li>
+<li><code class="inline">trigger</code> - The reason for the reset power|pin|sleep_or_config|command|watchdog
+</li>
+</ul>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-serial"></span><h3 data-path="proto.event.serial">event/serial</h3>
+<p>Serial data received from a device.</p>
+<h3>Fields:</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">serial</code>
+</li>
+<li><code class="inline">data</code> - The serial data
+</li>
+<li><code class="inline">block</code> - Sequence number for long strings
+</li>
+</ul>
+<span class="hidden" id="proto-event-tamper"></span><h3 data-path="proto.event.tamper">event/tamper</h3>
+<p>Reports a RF tamper attempt.</p>
+<h3>Fields:</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">tamper</code>
+</li>
+<li><code class="inline">duration</code> - Jamming durations in minutes
+</li>
+<li><code class="inline">ended</code> - Hours since jamming ended
+</li>
+</ul>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-prefix-generic-event-packet"></span><h2 data-path="proto.prefix.generic-event-packet">Generic Event Packet</h2>
+<p>In addition to the <a href="#proto-prefix-event-header">Event Header</a>
+a lot of status messages contain the current state of the device,
+possibly with some added information. The fields are documented
+below.</p>
+<h3>Fields</h3>
+<ul>
+<li><code class="inline">detail</code> - The type of event received
+</li>
+<li><code class="inline">data</code> - 0 if not otherwise specified
+</li>
+<li><code class="inline">locator</code> - The id of closest locator, if any (optional)
+</li>
+<li><code class="inline">temp</code> - The core temperature of the RF module
+</li>
+<li><code class="inline">temp</code> - The core temperature of the RF module in Celsius
+</li>
+<li><code class="inline">volt</code> - The voltage/battery monitor
+</li>
+<li><code class="inline">dio</code> - object containing digital i/o state
+</li>
+<li><code class="inline">aio0</code> - The analogue input ping #0
+</li>
+<li><code class="inline">aio1</code> - The analogue input pin #0
+</li>
+<li><code class="inline">hw</code> - The hardware revision
+</li>
+<li><code class="inline">fw</code> - The firmware revision
+</li>
+</ul>
+
+					
+						<span class="hidden" id="proto-event-next_receiver"></span><h3 data-path="proto-event-next_receiver">event/next_receiver</h3>
+<p>Response to a <a href="#proto-command-get_did_status">command/get_did_status</a>
+command.</p>
+<h3>Fields:</h3>
+<ul>
+<li><code class="inline">detail</code> - always set to <code class="inline">next_receiver</code>
+</li>
+<li><code class="inline">receiver</code> - the address of the receiver
+</li>
+</ul>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+
+					
+				</div>
+				<nav class="four columns">
+					<div id="docs-aside">
+						
+						<h4>API Endpoints</h4>
+						<ul class="nav">
+							
+								<li class="active">
+									<a href="#authentication">Authentication</a>
+									<ul class="nav">
+										
+											<li><a class="block-link" href="#endpoint-authentication-delete-auth-session">DELETE /auth/session</a></li>
+										
+											<li><a class="block-link" href="#endpoint-authentication-get-auth">GET /auth</a></li>
+										
+											<li><a class="block-link" href="#endpoint-authentication-post-auth-session">POST /auth/session</a></li>
+										
+									</ul>
+								</li>
+							
+								<li class="active">
+									<a href="#channels">Channels</a>
+									<ul class="nav">
+										
+											<li><a class="block-link" href="#endpoint-channels-post-channel-network-channel">POST /channel/:network/:channel</a></li>
+										
+									</ul>
+								</li>
+							
+								<li class="active">
+									<a href="#devices">Devices</a>
+									<ul class="nav">
+										
+											<li><a class="block-link" href="#endpoint-devices-get-device-network-device">GET /device/:network/:device</a></li>
+										
+											<li><a class="block-link" href="#endpoint-devices-post-device-network">POST /device/:network</a></li>
+										
+											<li><a class="block-link" href="#endpoint-devices-put-device-network-device">PUT /device/:network/:device</a></li>
+										
+									</ul>
+								</li>
+							
+								<li class="active">
+									<a href="#messages">Messages</a>
+									<ul class="nav">
+										
+											<li><a class="block-link" href="#endpoint-messages-get-message-network-device">GET /message/:network+:device</a></li>
+										
+											<li><a class="block-link" href="#endpoint-messages-get-message-query-network-deviceselector">GET /message-query/:network/[:device-selector]</a></li>
+										
+											<li><a class="block-link" href="#endpoint-messages-post-message-network-device">POST /message/:network/:device</a></li>
+										
+									</ul>
+								</li>
+							
+								<li class="active">
+									<a href="#network">Networks</a>
+									<ul class="nav">
+										
+											<li><a class="block-link" href="#endpoint-network-get-network">GET /network</a></li>
+										
+											<li><a class="block-link" href="#endpoint-network-get-network-network">GET /network/:network</a></li>
+										
+											<li><a class="block-link" href="#endpoint-network-post-network">POST /network</a></li>
+										
+											<li><a class="block-link" href="#endpoint-network-put-network-network">PUT /network/:network</a></li>
+										
+									</ul>
+								</li>
+							
+								<li class="active">
+									<a href="#organizations">Organizations</a>
+									<ul class="nav">
+										
+											<li><a class="block-link" href="#endpoint-organizations-delete-organization-organization-user-user">DELETE /organization/:organization/user/:user</a></li>
+										
+											<li><a class="block-link" href="#endpoint-organizations-get-organization">GET /organization</a></li>
+										
+											<li><a class="block-link" href="#endpoint-organizations-get-organization-organization">GET /organization/:organization</a></li>
+										
+											<li><a class="block-link" href="#endpoint-organizations-put-organization-organization">PUT /organization/:organization</a></li>
+										
+											<li><a class="block-link" href="#endpoint-organizations-put-organization-organization-user-user">PUT /organization/:organization/user/:user</a></li>
+										
+									</ul>
+								</li>
+							
+								<li class="active">
+									<a href="#user">User</a>
+									<ul class="nav">
+										
+											<li><a class="block-link" href="#endpoint-user-get-user">GET /user</a></li>
+										
+											<li><a class="block-link" href="#endpoint-user-put-user">PUT /user</a></li>
+										
+											<li><a class="block-link" href="#endpoint-user-user-register">POST /user/register</a></li>
+										
+									</ul>
+								</li>
+							
+						</ul>
+						
+
+						
+						<h4>Appendix</h4>
+						<ul class="nav">
+							
+								
+								<li class="active">
+									<a href="#proto-event">Events</a>
+									<ul class="nav">
+										
+											<li><a class="block-link" href="#proto-event-ack">event/ack (router)</a></li>
+										
+											<li><a class="block-link" href="#proto-event-ack-gw">event/ack (gateway)</a></li>
+										
+											<li><a class="block-link" href="#proto-event-aio0_change">event/aio0_change</a></li>
+										
+											<li><a class="block-link" href="#proto-event-aio1_change">event/aio1_change</a></li>
+										
+											<li><a class="block-link" href="#proto-event-config">event/config</a></li>
+										
+											<li><a class="block-link" href="#proto-event-ima">event/ima</a></li>
+										
+											<li><a class="block-link" href="#proto-event-io_change">event/io_change</a></li>
+										
+											<li><a class="block-link" href="#proto-event-nak">event/nak (router)</a></li>
+										
+											<li><a class="block-link" href="#proto-event-nak-gw">event/nak (gateway)</a></li>
+										
+											<li><a class="block-link" href="#proto-event-network_free">network_free</a></li>
+										
+											<li><a class="block-link" href="#proto-event-network_jammed">event/network_jammed</a></li>
+										
+											<li><a class="block-link" href="#proto-event-network_shared">event/network_shared</a></li>
+										
+											<li><a class="block-link" href="#proto-event-network_taken">event/network_taken</a></li>
+										
+											<li><a class="block-link" href="#proto-event-nid">event/nid</a></li>
+										
+											<li><a class="block-link" href="#proto-event-path">event/path</a></li>
+										
+											<li><a class="block-link" href="#proto-event-reset">event/reset</a></li>
+										
+											<li><a class="block-link" href="#proto-event-serial">event/serial</a></li>
+										
+											<li><a class="block-link" href="#proto-event-tamper">event/tamper</a></li>
+										
+									</ul>
+								</li>
+								
+							
+								
+								<li class="active">
+									<a href="#proto-command">Commands</a>
+									<ul class="nav">
+										
+											<li><a class="block-link" href="#proto-command-force_reset">command/force_reset</a></li>
+										
+											<li><a class="block-link" href="#proto-command-get_calibration">command/get_calibration</a></li>
+										
+											<li><a class="block-link" href="#proto-command-get_config">command/get_config</a></li>
+										
+											<li><a class="block-link" href="#proto-command-get_did_status">command/get_did_status</a></li>
+										
+											<li><a class="block-link" href="#proto-command-get_nid">command/get_nid</a></li>
+										
+											<li><a class="block-link" href="#proto-command-get_path">command/get_path</a></li>
+										
+											<li><a class="block-link" href="#proto-command-get_status">command/get_status</a></li>
+										
+											<li><a class="block-link" href="#proto-command-init_gw_config">command/init_gw_config</a></li>
+										
+											<li><a class="block-link" href="#proto-command-serial">command/serial</a></li>
+										
+											<li><a class="block-link" href="#proto-command-set_config">command/set_config</a></li>
+										
+											<li><a class="block-link" href="#proto-command-set_output">command/set_output</a></li>
+										
+											<li><a class="block-link" href="#proto-command-set_pwm">command/set_pwm</a></li>
+										
+									</ul>
+								</li>
+								
+							
+								
+								<li class="active">
+									<a href="#appendix">appendix</a>
+									<ul class="nav">
+										
+											<li><a class="block-link" href="#proto-appendix-command-format">Command Format</a></li>
+										
+											<li><a class="block-link" href="#proto-appendix-event-header">Event Header</a></li>
+										
+									</ul>
+								</li>
+								
+							
+								
+								<li class="active">
+									<a href="#proto-configuration">Configuration Options</a>
+									<ul class="nav">
+										
+									</ul>
+								</li>
+								
+							
+						</ul>
+						
+
+						<a class="back-to-top" href="#top">Back to top</a>
+					</div>
+				</nav>
+			</div>
+		</div>
+		<footer class="docs-footer" role="contentinfo">
+		<div class="container">
+			<p>
+				Designed, built and powered by awesome open source projects including
+					<a href="http://getskeleton.com/">Skeleton</a>,
+					<a href="https://github.com">GitHub</a> and
+					<a href="https://elixir-lang.org/">Elixir</a>
+			</p>
+
+			<ul class="docs-footer-links muted">
+				<li><b>Versions</b></li>
+				
+					
+						<li class="active"><a href="../0.6.1-rc2">0.6.1-rc2</a></li>
+					
+				
+			</ul>
+		</div>
+		</footer>
+	</body>
+</html>
