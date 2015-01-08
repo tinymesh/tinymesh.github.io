@@ -115,9 +115,13 @@ the field <code class="inline">raw</code> with Base64 encoded value.</p>
 					
 						<span class="hidden" id="endpoint-devices-post-device-network"></span><h2 data-path="endpoint.devices.post-device-network">POST /device/:network</h2>
 <p>Creates a new device under <code class="inline">network</code>.</p>
-<p>Returns the new object with it's path in <code class="inline">location</code> header. If a
-there was a conflict the location of the existing device will be in
-the <code class="inline">location</code> header.</p>
+<p>Returns the new object with it's path in <code class="inline">location</code> header. If
+there was a conflict the location of the existing device will be
+returned in the <code class="inline">location</code> header.</p>
+<p>By default a device ID is automatically generated for you by the
+cloud service. If you do not wish this you can control this option
+by specifying the <code class="inline">key</code> parameter you desire when you are creating
+the device.</p>
 <h3>Return</h3>
 <ul>
 <li><code class="inline">200 OK</code> - with list of <a href="#network_object">Network Object</a>'s
