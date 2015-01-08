@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>HTTP API - Tiny Mesh</title>
+		<title></title>
 		<link rel="stylesheet" href="./style.css" />
 		<meta charset="UTF-8" />
 	</head>
@@ -10,21 +10,7 @@
 			<div class="container">
 				<div class="eight columns">
 					
-						<span class="hidden" id="endpoint"></span><h1 data-path="endpoint">Tiny Mesh Cloud API</h1>
-<p>Tinymesh Cloud™ is a SaaS platform that extends Tinymesh™ networks
-with a secure communication- and data storage infrastructure, and
-provides additional services for network configuration, key management
-and over-the-air (OTA) upgrades of devices.</p>
-<p>The service is accessed through a RESTfull API that consumes JSON data.
-The API tightly integrates with the Tinymesh™ protocol by providing
-high-level interfaces and development patterns familiar to industrial
-systems as well as the modern application developer.</p>
-<h2>Getting Started</h2>
-<p>To get started developing using the cloud you will need some
-hardware (available through a <a href="http://www.radiocrafts.com/index.php?sideID=41">Radiocrafts distributor</a>.
-Once setup the <a href="https://cloud.tiny-mesh.com/">Cloud Workbench</a>
-provides an easy to use interface for communicating with your devices.</p>
-
+						
 					
 						<span class="hidden" id="endpoint-authentication"></span><h1 id="authentication" data-path="endpoint.authentication">Authentication</h1>
 <p>Provides endpoint for authenticate related tasks, including creation
@@ -164,10 +150,21 @@ the <code class="inline">location</code> header.</p>
 					
 						<span class="hidden" id="endpoint-messages"></span><h1 data-path="endpoint.messages">Messages</h1>
 <p>HTTP endpoint for querying messages</p>
+<h3 id="endpoint-messages-data-encoding">Data Encoding</h3>
+<p>For all of the endpoints that returns packet the encoding of binary
+payloads can be selected by using the <code class="inline">X-Data-Encoding</code> header or
+the <code class="inline">&amp;data-encoding</code> query parameter.</p>
+<p>The option takes an enum value <code class="inline">binary|hex|base64</code>. The default
+being <code class="inline">base64</code>.</p>
 
 					
 						<span class="hidden" id="endpoint-messages-get-message-network-device"></span><h2 data-path="endpoint.messages.get-message-network-device">GET /message/:network+:device</h2>
 <p>Returns a object containing fields according to <a href="#message_formats">Message Formats</a></p>
+<h3>Options</h3>
+<ul>
+<li><code class="inline">data-encoding</code> - see <a href="#endpoint-messages-data-encoding">Data Encoding</a>
+</li>
+</ul>
 <h3>Return</h3>
 <ul>
 <li><code class="inline">200 OK</code> - with list of <a href="#packet_object">Packet Object</a>'s
@@ -259,6 +256,8 @@ message delivered as a chunk.
 <li><code class="inline">authorization</code> - <code class="inline">Authorization</code> value, as specified by
 <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.8">HTTP spec</a>
 </li>
+<li><code class="inline">data-encoding</code> - see <a href="#endpoint-messages-data-encoding">Data Encoding</a>
+</li>
 </ul>
 <h3 id="date_field" class="note">Date field</h3>
 <p>The Date field is used to select a date time based on some simple
@@ -316,8 +315,13 @@ the <operator> can be one of:</p>
 message must be as defined in <a href="#packet_formats">Packet Formats</a>. Values like <code class="inline">uid</code>
 and <code class="inline">sid</code> are automatically set by the system, whilst <code class="inline">package_num</code>
 can optionally be specified. All other parameters are required.</p>
-<p>Creating event or serial messages from the API is discouraged, for
-all other purposes than federating data.</p>
+<p>Creating events from the API is discouraged for all other purposes
+than federating data.</p>
+<h2>Options</h2>
+<ul>
+<li><code class="inline">data-encoding</code> - see <a href="#endpoint-messages-data-encoding">Data Encoding</a>
+</li>
+</ul>
 <h3>Return</h3>
 <ul>
 <li><code class="inline">200 OK</code> - with list of <a href="#packet_object">Packet Object</a>'s
@@ -510,6 +514,19 @@ all resources under said <code class="inline">organization</code>.</p>
 </ul>
 
 					
+						<span class="hidden" id="endpoint-user-post-user-register"></span><h1 data-path="endpoint.user.post-user-register">POST /user/register</h1>
+<p>Creates a new users</p>
+<h2>Return</h2>
+<ul>
+<li><code class="inline">201 Created</code> - with <a href="#user_object">User Object</a>
+</li>
+<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> if error in payload
+</li>
+<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if users already exists
+</li>
+</ul>
+
+					
 						<span class="hidden" id="endpoint-user-put-user"></span><h2 data-path="endpoint.user.put-user">PUT /user</h2>
 <p>Retrieves the current user resource</p>
 <h3>Return</h3>
@@ -521,19 +538,6 @@ all resources under said <code class="inline">organization</code>.</p>
 <li><code class="inline">401 Unauthorized</code> - with <a href="#error_object">Error Object</a> if unauthenticated
 </li>
 <li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if lacking permissions
-</li>
-</ul>
-
-					
-						<span class="hidden" id="endpoint-user-user-register"></span><h1 data-path="endpoint.user.user-register">POST /user/register</h1>
-<p>Creates a new users</p>
-<h2>Return</h2>
-<ul>
-<li><code class="inline">201 Created</code> - with <a href="#user_object">User Object</a>
-</li>
-<li><code class="inline">400 Bad Request</code> - with <a href="#error_object">Error Object</a> if error in payload
-</li>
-<li><code class="inline">403 Forbidden</code> - with <a href="#error_object">Error Object</a> if users already exists
 </li>
 </ul>
 
@@ -910,14 +914,6 @@ command.</p>
 <li><code class="inline">reason</code> - The reason the command was rejected
 </li>
 </ul>
-<span class="hidden" id="proto-event-network_free"></span><p data-path="proto.event.network_free">See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
-<span class="hidden" id="proto-event-network_jammed"></span><h3 data-path="proto.event.network_jammed">event/network_jammed</h3>
-<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
-<span class="hidden" id="proto-event-network_shared"></span><h3 data-path="proto.event.network_shared">event/network_shared</h3>
-<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
-<span class="hidden" id="proto-event-network_taken"></span><h3 data-path="proto.event.network_taken">event/network_taken</h3>
-<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
-<h3>event/network_free</h3>
 <span class="hidden" id="proto-event-nid"></span><h3 data-path="proto.event.nid">event/nid</h3>
 <h3>Fields</h3>
 <ul>
@@ -947,6 +943,14 @@ command.</p>
 </li>
 </ul>
 <p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-rfchannel_free"></span><p data-path="proto.event.rfchannel_free">See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-rfchannel_jammed"></span><h3 data-path="proto.event.rfchannel_jammed">event/rfchannel_jammed</h3>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-rfchannel_shared"></span><h3 data-path="proto.event.rfchannel_shared">event/rfchannel_shared</h3>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<span class="hidden" id="proto-event-rfchannel_taken"></span><h3 data-path="proto.event.rfchannel_taken">event/rfchannel_taken</h3>
+<p>See <a href="#proto.appendix.generic-event-packet">Event Format</a> for structure of packet.</p>
+<h3>event/rfchannel_free</h3>
 <span class="hidden" id="proto-event-serial"></span><h3 data-path="proto.event.serial">event/serial</h3>
 <p>Serial data received from a device.</p>
 <h3>Fields:</h3>
@@ -1108,9 +1112,9 @@ command.</p>
 										
 											<li><a class="block-link" href="#endpoint-user-get-user">GET /user</a></li>
 										
-											<li><a class="block-link" href="#endpoint-user-put-user">PUT /user</a></li>
+											<li><a class="block-link" href="#endpoint-user-post-user-register">POST /user/register</a></li>
 										
-											<li><a class="block-link" href="#endpoint-user-user-register">POST /user/register</a></li>
+											<li><a class="block-link" href="#endpoint-user-put-user">PUT /user</a></li>
 										
 									</ul>
 								</li>
@@ -1145,19 +1149,19 @@ command.</p>
 										
 											<li><a class="block-link" href="#proto-event-nak-gw">event/nak (gateway)</a></li>
 										
-											<li><a class="block-link" href="#proto-event-network_free">network_free</a></li>
-										
-											<li><a class="block-link" href="#proto-event-network_jammed">event/network_jammed</a></li>
-										
-											<li><a class="block-link" href="#proto-event-network_shared">event/network_shared</a></li>
-										
-											<li><a class="block-link" href="#proto-event-network_taken">event/network_taken</a></li>
-										
 											<li><a class="block-link" href="#proto-event-nid">event/nid</a></li>
 										
 											<li><a class="block-link" href="#proto-event-path">event/path</a></li>
 										
 											<li><a class="block-link" href="#proto-event-reset">event/reset</a></li>
+										
+											<li><a class="block-link" href="#proto-event-rfchannel_free">rfchannel_free</a></li>
+										
+											<li><a class="block-link" href="#proto-event-rfchannel_jammed">event/rfchannel_jammed</a></li>
+										
+											<li><a class="block-link" href="#proto-event-rfchannel_shared">event/rfchannel_shared</a></li>
+										
+											<li><a class="block-link" href="#proto-event-rfchannel_taken">event/rfchannel_taken</a></li>
 										
 											<li><a class="block-link" href="#proto-event-serial">event/serial</a></li>
 										
